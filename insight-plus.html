@@ -1,0 +1,1143 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Insight Plus | KS한국고용정보 - AI 기반 VOC 분석 솔루션</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+  <style>
+    /* ===== RESET & BASE ===== */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      color: #E0E6ED;
+      background: #0B0F1A;
+      line-height: 1.7;
+      overflow-x: hidden;
+    }
+    a { text-decoration: none; color: inherit; }
+    ul { list-style: none; }
+    img { max-width: 100%; }
+
+    /* ===== COLORS ===== */
+    :root {
+      --navy-deepest: #060A14;
+      --navy-dark: #0B0F1A;
+      --navy-mid: #111827;
+      --navy-light: #1E293B;
+      --blue-accent: #1A6EFF;
+      --blue-glow: rgba(26, 110, 255, 0.25);
+      --blue-soft: #3B82F6;
+      --text-primary: #F1F5F9;
+      --text-secondary: #94A3B8;
+      --text-muted: #64748B;
+      --border-color: rgba(255, 255, 255, 0.06);
+      --gradient-blue: linear-gradient(135deg, #1A6EFF 0%, #3B82F6 50%, #60A5FA 100%);
+      --gradient-dark: linear-gradient(180deg, #0B0F1A 0%, #111827 100%);
+    }
+
+    /* ===== UTILITY ===== */
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+    .section-label {
+      display: inline-block;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--blue-accent);
+      margin-bottom: 16px;
+    }
+    .section-title {
+      font-size: clamp(28px, 4vw, 42px);
+      font-weight: 700;
+      color: var(--text-primary);
+      line-height: 1.3;
+      margin-bottom: 20px;
+    }
+    .section-desc {
+      font-size: 17px;
+      color: var(--text-secondary);
+      max-width: 680px;
+      line-height: 1.8;
+    }
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 16px 36px;
+      background: var(--gradient-blue);
+      color: #fff;
+      font-size: 16px;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 4px 24px var(--blue-glow);
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px rgba(26, 110, 255, 0.4);
+    }
+    .btn-outline {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 32px;
+      background: transparent;
+      color: var(--blue-accent);
+      font-size: 15px;
+      font-weight: 600;
+      border: 1.5px solid var(--blue-accent);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-outline:hover {
+      background: rgba(26, 110, 255, 0.1);
+    }
+
+    /* ===== HEADER ===== */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      background: rgba(11, 15, 26, 0.85);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border-color);
+      transition: background 0.3s;
+    }
+    .header-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 72px;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      font-weight: 700;
+      font-size: 18px;
+      color: var(--text-primary);
+    }
+    .logo-img {
+      height: 28px;
+      width: auto;
+      object-fit: contain;
+    }
+    .logo-divider {
+      width: 1px;
+      height: 20px;
+      background: rgba(255, 255, 255, 0.2);
+    }
+    .logo span { color: var(--blue-accent); font-weight: 700; font-size: 17px; }
+    .nav { display: flex; align-items: center; gap: 32px; }
+    .nav a {
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      transition: color 0.2s;
+      position: relative;
+    }
+    .nav a:hover { color: var(--text-primary); }
+    .nav-cta {
+      padding: 10px 24px !important;
+      background: var(--blue-accent) !important;
+      color: #fff !important;
+      border-radius: 6px;
+      font-weight: 600 !important;
+      transition: opacity 0.2s !important;
+    }
+    .nav-cta:hover { opacity: 0.9; }
+    .mobile-toggle {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      cursor: pointer;
+      background: none;
+      border: none;
+      padding: 4px;
+    }
+    .mobile-toggle span {
+      width: 24px;
+      height: 2px;
+      background: var(--text-primary);
+      border-radius: 2px;
+      transition: 0.3s;
+    }
+
+    /* ===== HERO ===== */
+    .hero {
+      position: relative;
+      padding: 180px 0 120px;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -200px;
+      right: -200px;
+      width: 700px;
+      height: 700px;
+      background: radial-gradient(circle, rgba(26, 110, 255, 0.12) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero::after {
+      content: '';
+      position: absolute;
+      bottom: -100px;
+      left: -150px;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(26, 110, 255, 0.06) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-content { position: relative; z-index: 1; max-width: 760px; }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 18px;
+      background: rgba(26, 110, 255, 0.1);
+      border: 1px solid rgba(26, 110, 255, 0.25);
+      border-radius: 100px;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--blue-accent);
+      margin-bottom: 28px;
+    }
+    .hero-badge::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      background: var(--blue-accent);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+    .hero h1 {
+      font-size: clamp(36px, 5.5vw, 56px);
+      font-weight: 900;
+      color: var(--text-primary);
+      line-height: 1.25;
+      margin-bottom: 24px;
+      letter-spacing: -0.5px;
+    }
+    .hero h1 em {
+      font-style: normal;
+      background: var(--gradient-blue);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero p {
+      font-size: 19px;
+      color: var(--text-secondary);
+      line-height: 1.8;
+      margin-bottom: 40px;
+      max-width: 620px;
+    }
+    .hero-buttons { display: flex; gap: 16px; flex-wrap: wrap; }
+
+    /* ===== OVERVIEW ===== */
+    .overview {
+      padding: 120px 0;
+      background: var(--navy-mid);
+      position: relative;
+    }
+    .overview-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 64px;
+      align-items: center;
+    }
+    .overview-text .section-desc { margin-bottom: 32px; }
+    .overview-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    .stat-card {
+      padding: 24px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+    }
+    .stat-card .number {
+      font-size: 32px;
+      font-weight: 800;
+      color: var(--blue-accent);
+      margin-bottom: 4px;
+    }
+    .stat-card .label {
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+    .overview-visual {
+      position: relative;
+      background: var(--navy-dark);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 40px;
+      min-height: 400px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .flow-step {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      padding: 18px 0;
+      position: relative;
+    }
+    .flow-step:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      left: 23px;
+      top: 56px;
+      width: 2px;
+      height: calc(100% - 36px);
+      background: linear-gradient(to bottom, var(--blue-accent), transparent);
+    }
+    .flow-icon {
+      width: 48px;
+      height: 48px;
+      min-width: 48px;
+      background: rgba(26, 110, 255, 0.1);
+      border: 1px solid rgba(26, 110, 255, 0.3);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      z-index: 1;
+    }
+    .flow-text h4 {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 2px;
+    }
+    .flow-text p {
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    /* ===== FEATURES ===== */
+    .features {
+      padding: 120px 0;
+      background: var(--navy-dark);
+    }
+    .features-header {
+      text-align: center;
+      margin-bottom: 64px;
+    }
+    .features-header .section-desc { margin: 0 auto; }
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+    .feature-card {
+      padding: 36px 32px;
+      background: var(--navy-mid);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      transition: border-color 0.3s, transform 0.3s;
+    }
+    .feature-card:hover {
+      border-color: rgba(26, 110, 255, 0.3);
+      transform: translateY(-4px);
+    }
+    .feature-icon {
+      width: 56px;
+      height: 56px;
+      background: rgba(26, 110, 255, 0.1);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      margin-bottom: 20px;
+    }
+    .feature-card h3 {
+      font-size: 19px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 12px;
+    }
+    .feature-card p {
+      font-size: 15px;
+      color: var(--text-secondary);
+      line-height: 1.75;
+    }
+
+    /* ===== DIRECTION (비즈니스 방향성) ===== */
+    .direction {
+      padding: 120px 0;
+      background: var(--navy-mid);
+      position: relative;
+      overflow: hidden;
+    }
+    .direction::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 800px;
+      height: 800px;
+      background: radial-gradient(circle, rgba(26, 110, 255, 0.05) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .direction-header {
+      text-align: center;
+      margin-bottom: 64px;
+      position: relative;
+    }
+    .direction-header .section-desc { margin: 0 auto; }
+    .direction-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+      position: relative;
+    }
+    .direction-card {
+      text-align: center;
+      padding: 40px 28px;
+      background: var(--navy-dark);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.3s, border-color 0.3s;
+    }
+    .direction-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(26, 110, 255, 0.3);
+    }
+    .direction-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+    }
+    .direction-card.remove::before { background: linear-gradient(90deg, #EF4444, #F87171); }
+    .direction-card.simplify::before { background: linear-gradient(90deg, #F59E0B, #FBBF24); }
+    .direction-card.automate::before { background: linear-gradient(90deg, #1A6EFF, #60A5FA); }
+    .direction-card.leverage::before { background: linear-gradient(90deg, #10B981, #34D399); }
+    .direction-icon {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 20px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+    }
+    .direction-card.remove .direction-icon { background: rgba(239, 68, 68, 0.1); }
+    .direction-card.simplify .direction-icon { background: rgba(245, 158, 11, 0.1); }
+    .direction-card.automate .direction-icon { background: rgba(26, 110, 255, 0.1); }
+    .direction-card.leverage .direction-icon { background: rgba(16, 185, 129, 0.1); }
+    .direction-card h3 {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+    .direction-card .tag {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+      padding: 4px 12px;
+      border-radius: 100px;
+    }
+    .direction-card.remove .tag { color: #F87171; background: rgba(239, 68, 68, 0.1); }
+    .direction-card.simplify .tag { color: #FBBF24; background: rgba(245, 158, 11, 0.1); }
+    .direction-card.automate .tag { color: #60A5FA; background: rgba(26, 110, 255, 0.1); }
+    .direction-card.leverage .tag { color: #34D399; background: rgba(16, 185, 129, 0.1); }
+    .direction-card p {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.75;
+    }
+    .direction-bottom {
+      margin-top: 48px;
+      text-align: center;
+    }
+    .direction-summary {
+      display: inline-flex;
+      align-items: center;
+      gap: 16px;
+      padding: 24px 40px;
+      background: rgba(26, 110, 255, 0.06);
+      border: 1px solid rgba(26, 110, 255, 0.2);
+      border-radius: 16px;
+    }
+    .direction-summary .arrow-icon {
+      font-size: 24px;
+      color: var(--blue-accent);
+    }
+    .direction-summary p {
+      font-size: 17px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    .direction-summary p em {
+      font-style: normal;
+      color: var(--blue-accent);
+    }
+
+    /* ===== IMPACT ===== */
+    .impact {
+      padding: 120px 0;
+      background: var(--navy-dark);
+    }
+    .impact-header {
+      text-align: center;
+      margin-bottom: 64px;
+    }
+    .impact-header .section-desc { margin: 0 auto; }
+    .impact-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+    }
+    .impact-card {
+      text-align: center;
+      padding: 44px 24px;
+      background: var(--navy-mid);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      transition: border-color 0.3s;
+    }
+    .impact-card:hover { border-color: rgba(26, 110, 255, 0.3); }
+    .impact-number {
+      font-size: 48px;
+      font-weight: 900;
+      background: var(--gradient-blue);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 8px;
+      line-height: 1.1;
+    }
+    .impact-unit {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
+    .impact-label {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+    .impact-desc {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    /* ===== TARGET ===== */
+    .target {
+      padding: 120px 0;
+      background: var(--navy-mid);
+    }
+    .target-header {
+      text-align: center;
+      margin-bottom: 64px;
+    }
+    .target-header .section-desc { margin: 0 auto; }
+    .target-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+    .target-card {
+      padding: 36px 32px;
+      background: var(--navy-dark);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      transition: border-color 0.3s;
+    }
+    .target-card:hover { border-color: rgba(26, 110, 255, 0.3); }
+    .target-icon {
+      width: 48px;
+      height: 48px;
+      background: rgba(26, 110, 255, 0.1);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      margin-bottom: 18px;
+    }
+    .target-card h3 {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 10px;
+    }
+    .target-card p {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.75;
+    }
+    .target-roles {
+      margin-top: 48px;
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .role-chip {
+      padding: 10px 24px;
+      background: rgba(26, 110, 255, 0.08);
+      border: 1px solid rgba(26, 110, 255, 0.2);
+      border-radius: 100px;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--blue-soft);
+    }
+
+    /* ===== CTA ===== */
+    .cta {
+      padding: 120px 0;
+      background: var(--navy-dark);
+      position: relative;
+      overflow: hidden;
+    }
+    .cta::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 900px;
+      height: 600px;
+      background: radial-gradient(ellipse, rgba(26, 110, 255, 0.1) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    .cta-box {
+      position: relative;
+      text-align: center;
+      padding: 80px 40px;
+      background: linear-gradient(135deg, rgba(26, 110, 255, 0.08) 0%, rgba(26, 110, 255, 0.02) 100%);
+      border: 1px solid rgba(26, 110, 255, 0.2);
+      border-radius: 24px;
+    }
+    .cta-box h2 {
+      font-size: clamp(28px, 4vw, 40px);
+      font-weight: 800;
+      color: var(--text-primary);
+      margin-bottom: 16px;
+    }
+    .cta-box p {
+      font-size: 17px;
+      color: var(--text-secondary);
+      margin-bottom: 40px;
+      max-width: 560px;
+      margin-left: auto;
+      margin-right: auto;
+      line-height: 1.8;
+    }
+    .cta-buttons { display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; }
+    .cta-info {
+      margin-top: 32px;
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+    .cta-info a {
+      color: var(--blue-accent);
+      font-weight: 500;
+    }
+
+    /* ===== FOOTER ===== */
+    .footer {
+      padding: 48px 0;
+      background: var(--navy-deepest);
+      border-top: 1px solid var(--border-color);
+    }
+    .footer-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 40px;
+      flex-wrap: wrap;
+    }
+    .footer-brand .logo { margin-bottom: 16px; }
+    .footer-info {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 2;
+    }
+    .footer-contact { text-align: right; }
+    .footer-contact p {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+    .footer-contact a {
+      color: var(--blue-accent);
+      font-weight: 600;
+    }
+    .footer-copyright {
+      text-align: center;
+      padding-top: 32px;
+      margin-top: 32px;
+      border-top: 1px solid var(--border-color);
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    /* ===== MOBILE NAV ===== */
+    .mobile-nav {
+      display: none;
+      position: fixed;
+      top: 72px;
+      left: 0;
+      right: 0;
+      background: rgba(11, 15, 26, 0.98);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border-color);
+      padding: 24px;
+      z-index: 999;
+    }
+    .mobile-nav.active { display: block; }
+    .mobile-nav a {
+      display: block;
+      padding: 14px 0;
+      font-size: 16px;
+      color: var(--text-secondary);
+      border-bottom: 1px solid var(--border-color);
+    }
+    .mobile-nav a:last-child { border-bottom: none; }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 1024px) {
+      .features-grid { grid-template-columns: repeat(2, 1fr); }
+      .direction-grid { grid-template-columns: repeat(2, 1fr); }
+      .impact-grid { grid-template-columns: repeat(2, 1fr); }
+      .overview-grid { grid-template-columns: 1fr; gap: 48px; }
+    }
+    @media (max-width: 768px) {
+      .nav { display: none; }
+      .mobile-toggle { display: flex; }
+      .hero { padding: 140px 0 80px; }
+      .hero h1 { font-size: 32px; }
+      .hero p { font-size: 16px; }
+      .features-grid { grid-template-columns: 1fr; }
+      .direction-grid { grid-template-columns: 1fr; }
+      .impact-grid { grid-template-columns: 1fr 1fr; }
+      .target-grid { grid-template-columns: 1fr; }
+      .overview-stats { grid-template-columns: 1fr 1fr; }
+      .cta-box { padding: 48px 24px; }
+      .footer-inner { flex-direction: column; }
+      .footer-contact { text-align: left; }
+      .direction-summary { flex-direction: column; gap: 8px; padding: 20px 24px; }
+    }
+    @media (max-width: 480px) {
+      .impact-grid { grid-template-columns: 1fr; }
+      .overview-stats { grid-template-columns: 1fr; }
+      .hero-buttons { flex-direction: column; }
+      .hero-buttons a { width: 100%; text-align: center; justify-content: center; }
+    }
+
+    /* ===== ANIMATION ===== */
+    .fade-up {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .fade-up.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="header">
+    <div class="container header-inner">
+      <a href="https://ksjob.co.kr" class="logo">
+        <img src="assets/logo-white.png" alt="KS한국고용정보" class="logo-img">
+        <div class="logo-divider"></div>
+        <span>Insight Plus</span>
+      </a>
+      <nav class="nav">
+        <a href="#overview">제품 개요</a>
+        <a href="#features">주요 기능</a>
+        <a href="#direction">비즈니스 가치</a>
+        <a href="#impact">도입 효과</a>
+        <a href="#target">적용 분야</a>
+        <a href="mailto:strategy@ksjob.co.kr" class="nav-cta">도입 문의</a>
+      </nav>
+      <button class="mobile-toggle" onclick="toggleMobile()" aria-label="메뉴 열기">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+    <div class="mobile-nav" id="mobileNav">
+      <a href="#overview" onclick="closeMobile()">제품 개요</a>
+      <a href="#features" onclick="closeMobile()">주요 기능</a>
+      <a href="#direction" onclick="closeMobile()">비즈니스 가치</a>
+      <a href="#impact" onclick="closeMobile()">도입 효과</a>
+      <a href="#target" onclick="closeMobile()">적용 분야</a>
+      <a href="mailto:strategy@ksjob.co.kr" onclick="closeMobile()">도입 문의</a>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="container">
+      <div class="hero-content fade-up">
+        <div class="hero-badge">AI-Powered VOC Analytics</div>
+        <h1>컨택센터 데이터에서<br><em>비용 절감</em>과 <em>매출 기회</em>를<br>동시에 발견하다</h1>
+        <p>Insight Plus는 AI가 상담 데이터를 자동 분석하여 불필요한 비용은 제거하고, 숨겨진 비즈니스 기회는 극대화하는 차세대 VOC 인텔리전스 플랫폼입니다.</p>
+        <div class="hero-buttons">
+          <a href="mailto:strategy@ksjob.co.kr" class="btn-primary">도입 문의하기 &rarr;</a>
+          <a href="#overview" class="btn-outline">제품 알아보기</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- OVERVIEW -->
+  <section class="overview" id="overview">
+    <div class="container">
+      <div class="overview-grid">
+        <div class="overview-text fade-up">
+          <span class="section-label">Product Overview</span>
+          <h2 class="section-title">왜 Insight Plus인가?</h2>
+          <p class="section-desc">
+            컨택센터에는 매일 수천 건의 고객 상담이 쌓이지만, 대부분 분석되지 않은 채 사라집니다.
+            Insight Plus는 GPT-4o 기반 AI가 상담 데이터를 자동으로 분석하여 고객 의도(Intent)를 추출하고,
+            이를 비즈니스 가치 프레임워크에 매핑합니다.
+          </p>
+          <p class="section-desc">
+            단순한 리포팅이 아닌, <strong>TCO(총소유비용) 절감</strong>과 <strong>Leverage(고객가치 극대화)</strong>라는
+            두 가지 비즈니스 목표에 직결되는 실행 가능한 인사이트를 제공합니다.
+          </p>
+          <div class="overview-stats">
+            <div class="stat-card">
+              <div class="number">95%</div>
+              <div class="label">분석 시간 단축</div>
+            </div>
+            <div class="stat-card">
+              <div class="number">4단계</div>
+              <div class="label">데이터 추적 Drill-down</div>
+            </div>
+            <div class="stat-card">
+              <div class="number">5분</div>
+              <div class="label">카테고리 자동 설계</div>
+            </div>
+            <div class="stat-card">
+              <div class="number">100%</div>
+              <div class="label">원본 데이터 검증 가능</div>
+            </div>
+          </div>
+        </div>
+        <div class="overview-visual fade-up">
+          <div class="flow-step">
+            <div class="flow-icon">&#128218;</div>
+            <div class="flow-text">
+              <h4>1. 데이터 업로드</h4>
+              <p>상담 로그(CSV/Excel)를 업로드하면 AI가 자동으로 구조 분석</p>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-icon">&#129302;</div>
+            <div class="flow-text">
+              <h4>2. AI 자동 분석</h4>
+              <p>인텐트 추출 → 카테고리 분류 → 가치 매핑까지 자동 수행</p>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-icon">&#128200;</div>
+            <div class="flow-text">
+              <h4>3. 인사이트 대시보드</h4>
+              <p>6개 분석 뷰에서 트렌드, 비용, 기회 요인을 시각적으로 확인</p>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-icon">&#127919;</div>
+            <div class="flow-text">
+              <h4>4. 실행 의사결정</h4>
+              <p>TCO 절감과 Leverage 기회를 기반으로 즉시 실행 가능한 액션 도출</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section class="features" id="features">
+    <div class="container">
+      <div class="features-header fade-up">
+        <span class="section-label">Core Features</span>
+        <h2 class="section-title">AI가 만드는 차세대 VOC 분석</h2>
+        <p class="section-desc">회사명만 입력하면 AI가 도메인을 자동 학습하고, 상담 데이터에서 핵심 인사이트를 추출합니다.</p>
+      </div>
+      <div class="features-grid">
+
+        <div class="feature-card fade-up">
+          <div class="feature-icon">&#128161;</div>
+          <h3>자동 컨텍스트 생성</h3>
+          <p>회사명만 입력하면 AI가 업종, 서비스 특성, 상담 유형을 자동으로 리서치하여 분석 환경을 세팅합니다.</p>
+        </div>
+
+        <div class="feature-card fade-up">
+          <div class="feature-icon">&#127793;</div>
+          <h3>LLM 인텐트 추출</h3>
+          <p>GPT-4o가 한 통화에서 복수의 고객 의도를 정밀하게 추출합니다. 단일 분류가 아닌 다중 인텐트 분석으로 놓치는 VOC가 없습니다.</p>
+        </div>
+
+        <div class="feature-card fade-up">
+          <div class="feature-icon">&#128736;</div>
+          <h3>카테고리 자동 설계</h3>
+          <p>L1/L2/L3 3단계 분류 체계를 AI가 5분 내에 자동 생성합니다. 드래그앤드롭으로 직관적 수정이 가능합니다.</p>
+        </div>
+
+        <div class="feature-card fade-up">
+          <div class="feature-icon">&#128202;</div>
+          <h3>6대 분석 대시보드</h3>
+          <p>인텐트 분포, 트렌드, 가치 인사이트, TCO 시뮬레이션, CPX/IPC 지표, 문제 인텐트 등 핵심 뷰를 제공합니다.</p>
+        </div>
+
+        <div class="feature-card fade-up">
+          <div class="feature-icon">&#128269;</div>
+          <h3>4단계 Drill-down</h3>
+          <p>대시보드의 모든 수치를 L2 요약 → L3 상세 → 인텐트 목록 → 원본 데이터까지 4단계로 검증할 수 있습니다.</p>
+        </div>
+
+        <div class="feature-card fade-up">
+          <div class="feature-icon">&#128176;</div>
+          <h3>TCO 시뮬레이션</h3>
+          <p>자동화, 프로세스 개선 등 시나리오별 비용 절감 효과를 실시간으로 시뮬레이션하여 의사결정을 지원합니다.</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- BUSINESS DIRECTION (4-Value Framework) -->
+  <section class="direction" id="direction">
+    <div class="container">
+      <div class="direction-header fade-up">
+        <span class="section-label">Business Value Framework</span>
+        <h2 class="section-title">4가지 가치 프레임워크로<br>비용 절감과 매출 기회를 동시에</h2>
+        <p class="section-desc">
+          Insight Plus는 모든 고객 상담을 4가지 비즈니스 가치로 분류합니다.<br>
+          궁극적으로 <strong>TCO를 최소화</strong>하고 <strong>Leverage를 극대화</strong>하여 컨택센터를 비용 센터에서 가치 센터로 전환합니다.
+        </p>
+      </div>
+
+      <div class="direction-grid">
+        <div class="direction-card remove fade-up">
+          <div class="direction-icon">&#10060;</div>
+          <span class="tag">Remove</span>
+          <h3>불필요 비용 제거</h3>
+          <p>불필요한 반복 문의, 시스템 오류로 인한 인입 등 근본 원인을 제거하여 콜 자체를 줄입니다.</p>
+        </div>
+
+        <div class="direction-card simplify fade-up">
+          <div class="direction-icon">&#9997;&#65039;</div>
+          <span class="tag">Simplify</span>
+          <h3>프로세스 간소화</h3>
+          <p>복잡한 절차, 불명확한 안내를 개선하여 상담 시간을 단축하고 처리 비용을 절감합니다.</p>
+        </div>
+
+        <div class="direction-card automate fade-up">
+          <div class="direction-icon">&#9881;&#65039;</div>
+          <span class="tag">Automate</span>
+          <h3>자동화 전환</h3>
+          <p>챗봇, IVR 등으로 전환 가능한 단순 반복 문의를 식별하여 운영 비용을 구조적으로 절감합니다.</p>
+        </div>
+
+        <div class="direction-card leverage fade-up">
+          <div class="direction-icon">&#128640;</div>
+          <span class="tag">Leverage</span>
+          <h3>매출 기회 극대화</h3>
+          <p>업셀, 크로스셀, 이탈 방지 등 숨겨진 비즈니스 기회를 발굴하여 컨택센터를 수익 창출 채널로 전환합니다.</p>
+        </div>
+      </div>
+
+      <div class="direction-bottom fade-up">
+        <div class="direction-summary">
+          <span class="arrow-icon">&#127919;</span>
+          <p>Remove + Simplify + Automate = <em>TCO 절감</em> &nbsp;&nbsp;|&nbsp;&nbsp; Leverage = <em>매출 극대화</em></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- IMPACT -->
+  <section class="impact" id="impact">
+    <div class="container">
+      <div class="impact-header fade-up">
+        <span class="section-label">Expected Impact</span>
+        <h2 class="section-title">도입 후 기대 효과</h2>
+        <p class="section-desc">Insight Plus 도입으로 비용은 줄이고, 인사이트의 깊이와 속도는 극대화합니다.</p>
+      </div>
+      <div class="impact-grid">
+        <div class="impact-card fade-up">
+          <div class="impact-number">95%</div>
+          <div class="impact-unit">↓ Reduction</div>
+          <div class="impact-label">분석 시간 단축</div>
+          <div class="impact-desc">수주~수개월 소요되던 VOC 분석을 수시간 내에 완료</div>
+        </div>
+        <div class="impact-card fade-up">
+          <div class="impact-number">30%</div>
+          <div class="impact-unit">↓ Cost Saving</div>
+          <div class="impact-label">상담 운영비 절감</div>
+          <div class="impact-desc">불필요 콜 제거 + 자동화 전환으로 구조적 비용 절감</div>
+        </div>
+        <div class="impact-card fade-up">
+          <div class="impact-number">10x</div>
+          <div class="impact-unit">↑ Speed</div>
+          <div class="impact-label">인사이트 도출 속도</div>
+          <div class="impact-desc">병렬 처리와 시맨틱 샘플링으로 대규모 데이터도 고속 분석</div>
+        </div>
+        <div class="impact-card fade-up">
+          <div class="impact-number">100%</div>
+          <div class="impact-unit">Full Traceability</div>
+          <div class="impact-label">데이터 신뢰도</div>
+          <div class="impact-desc">모든 분석 결과를 원본 상담 데이터까지 추적하여 검증 가능</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TARGET -->
+  <section class="target" id="target">
+    <div class="container">
+      <div class="target-header fade-up">
+        <span class="section-label">Who It's For</span>
+        <h2 class="section-title">이런 기업에 적합합니다</h2>
+        <p class="section-desc">대규모 고객 상담을 운영하는 모든 기업에서 Insight Plus의 가치를 경험할 수 있습니다.</p>
+      </div>
+      <div class="target-grid">
+        <div class="target-card fade-up">
+          <div class="target-icon">&#128722;</div>
+          <h3>유통 / 이커머스</h3>
+          <p>주문, 배송, 반품 관련 대량 상담을 분석하여 프로세스 병목을 해소하고 고객 경험을 개선합니다.</p>
+        </div>
+        <div class="target-card fade-up">
+          <div class="target-icon">&#128241;</div>
+          <h3>통신 / IT 서비스</h3>
+          <p>기술 지원, 요금 문의 등 반복성 높은 상담의 자동화 기회를 식별하여 운영 효율을 극대화합니다.</p>
+        </div>
+        <div class="target-card fade-up">
+          <div class="target-icon">&#127974;</div>
+          <h3>금융 / 보험</h3>
+          <p>계좌, 보험금 청구, 민원 등 컴플라이언스가 중요한 상담에서 리스크와 개선점을 동시에 분석합니다.</p>
+        </div>
+        <div class="target-card fade-up">
+          <div class="target-icon">&#127828;</div>
+          <h3>외식 / 프랜차이즈</h3>
+          <p>가맹점-본사-고객 3자 간 상담 데이터에서 서비스 품질과 운영 이슈를 체계적으로 파악합니다.</p>
+        </div>
+        <div class="target-card fade-up">
+          <div class="target-icon">&#128187;</div>
+          <h3>SaaS / 플랫폼</h3>
+          <p>제품 지원 상담에서 기능 개선 요구와 이탈 신호를 자동 감지하여 제품 전략에 반영합니다.</p>
+        </div>
+        <div class="target-card fade-up">
+          <div class="target-icon">&#127970;</div>
+          <h3>공공 / 대기업 컨택센터</h3>
+          <p>수만 건 이상의 대량 상담 데이터도 안정적으로 처리하며, 감사 추적이 가능한 분석을 제공합니다.</p>
+        </div>
+      </div>
+      <div class="target-roles fade-up">
+        <span class="role-chip">COO / 운영 총괄</span>
+        <span class="role-chip">CX 디렉터</span>
+        <span class="role-chip">컨택센터장</span>
+        <span class="role-chip">QA 매니저</span>
+        <span class="role-chip">데이터 분석팀</span>
+        <span class="role-chip">경영기획실</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta" id="contact">
+    <div class="container">
+      <div class="cta-box fade-up">
+        <h2>지금, 컨택센터 데이터의<br>숨겨진 가치를 발견하세요</h2>
+        <p>Insight Plus 도입 상담을 통해 귀사의 VOC 데이터에서 어떤 비용 절감과 매출 기회가 있는지 확인해 보세요.</p>
+        <div class="cta-buttons">
+          <a href="mailto:strategy@ksjob.co.kr" class="btn-primary">도입 문의하기 &rarr;</a>
+          <a href="tel:02-6454-2054" class="btn-outline">&#128222; 영업팀 직접 연결</a>
+        </div>
+        <p class="cta-info">이메일: <a href="mailto:strategy@ksjob.co.kr">strategy@ksjob.co.kr</a> &nbsp;|&nbsp; 영업문의: <a href="tel:02-6454-2054">02-6454-2054</a></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-inner">
+        <div class="footer-brand">
+          <div class="logo">
+            <img src="assets/logo-white.png" alt="KS한국고용정보" class="logo-img">
+          </div>
+          <div class="footer-info">
+            (05203) 서울특별시 강동구 고덕비즈밸리로 38(고덕동)<br>
+            대표 손영득 · 허대건<br>
+            사업자등록번호 안내
+          </div>
+        </div>
+        <div class="footer-contact">
+          <p>대표번호 <strong>02-6454-2000</strong></p>
+          <p>영업문의 <a href="tel:02-6454-2054">02-6454-2054</a></p>
+          <p>이메일 <a href="mailto:strategy@ksjob.co.kr">strategy@ksjob.co.kr</a></p>
+        </div>
+      </div>
+      <div class="footer-copyright">
+        &copy; 2025 KS한국고용정보. All rights reserved.
+      </div>
+    </div>
+  </footer>
+
+  <!-- SCRIPTS -->
+  <script>
+    // Mobile nav toggle
+    function toggleMobile() {
+      document.getElementById('mobileNav').classList.toggle('active');
+    }
+    function closeMobile() {
+      document.getElementById('mobileNav').classList.remove('active');
+    }
+
+    // Scroll animation
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+    document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+  </script>
+</body>
+</html>
