@@ -617,6 +617,39 @@
       color: var(--blue-soft);
     }
 
+    /* ===== VIDEO ===== */
+    .video-section {
+      padding: 120px 0;
+      background: var(--navy-mid);
+    }
+    .video-header {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+    .video-header .section-desc { margin: 0 auto; }
+    .video-wrapper {
+      position: relative;
+      max-width: 960px;
+      margin: 0 auto;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4);
+    }
+    .video-wrapper iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: 0;
+    }
+    .video-wrapper::before {
+      content: "";
+      display: block;
+      padding-top: 56.25%; /* 16:9 비율 */
+    }
+
     /* ===== CTA ===== */
     .cta {
       padding: 120px 0;
@@ -1094,6 +1127,20 @@
         <span class="role-chip">QA 매니저</span>
         <span class="role-chip">데이터 분석팀</span>
         <span class="role-chip">경영기획실</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- VIDEO -->
+  <section class="video-section" id="video">
+    <div class="container">
+      <div class="video-header fade-up">
+        <span class="section-label">Product Demo</span>
+        <h2 class="section-title">Insight Plus 소개 영상</h2>
+        <p class="section-desc">AI 기반 VOC 분석 대시보드가 실제로 어떻게 작동하는지 확인해 보세요.</p>
+      </div>
+      <div class="video-wrapper fade-up">
+        <iframe src="https://www.youtube.com/embed/Onw2gxdDjYo" title="Insight Plus 소개 영상" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
       </div>
     </div>
   </section>
